@@ -27,7 +27,7 @@ export const MonsterList = ({ sightings, onDelete }: MonsterListProps) => {
   const [monsterFilter, setMonsterFilter] = useState<string>("");
   const [mapFilter, setMapFilter] = useState<string>("");
   const [channelFilter, setChannelFilter] = useState<number | "">("");
-  const [currentTime, setCurrentTime] = useState<Date>(new Date());
+  const [, setCurrentTime] = useState<Date>(new Date());
 
   // Update time every minute
   useEffect(() => {
