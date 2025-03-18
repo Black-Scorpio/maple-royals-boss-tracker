@@ -82,7 +82,7 @@ export const MonsterList = ({ sightings, onDelete }: MonsterListProps) => {
         status: `Respawning soon! (~${minutesUntilEarliest} minutes)`,
         color: "#fff9c4", // Close to respawning (Yellow)
       };
-    } else if (now >= earliest && now < respawnTime) {
+    } else if (now >= earliest && now <= respawnTime) {
       return {
         status: "Respawning soon!",
         color: "#e8f5e9", // Within respawn range (Light Green)
