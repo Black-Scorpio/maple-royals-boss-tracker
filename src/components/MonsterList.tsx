@@ -84,12 +84,12 @@ export const MonsterList = ({ sightings, onDelete }: MonsterListProps) => {
       };
     } else if (now >= earliest && now <= respawnTime) {
       return {
-        status: "Respawning soon!",
+        status: `Respawning any minute now! (~${minutesUntilEarliest} minutes)`,
         color: "#e8f5e9", // Within respawn range (Light Green)
       };
     } else if (now >= respawnTime && now < latest) {
       return {
-        status: "Respawning now!",
+        status: "Should be spawned!",
         color: "#c8e6c9", // Exact respawn time (Dark Green)
       };
     } else {
