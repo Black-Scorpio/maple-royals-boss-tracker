@@ -73,7 +73,7 @@ export const MonsterTable = ({
         )} (${formatTime(earliest)})`,
         color: "#ffebee",
       };
-    } else if (minutesUntilEarliest > 0) {
+    } else if (minutesUntilEarliest >= 0) {
       return {
         status: `Respawning soon! (~${formatTimeRemaining(
           minutesUntilEarliest
