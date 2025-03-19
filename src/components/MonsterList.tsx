@@ -3,6 +3,7 @@ import { Paper, Typography } from "@mui/material";
 import { MonsterFilters } from "./MonsterFilters";
 import { MonsterTable } from "./MonsterTable";
 import { Sighting } from "../interfaces";
+import { formatTime } from "../utils/timeUtils";
 
 interface MonsterListProps {
   sightings: Sighting[];
@@ -13,11 +14,6 @@ export const MonsterList = ({ sightings, onDelete }: MonsterListProps) => {
   const [monsterFilter, setMonsterFilter] = useState<string>("");
   const [mapFilter, setMapFilter] = useState<string>("");
   const [channelFilter, setChannelFilter] = useState<number | "">("");
-
-  // Format time without seconds
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  };
 
   // Filter sightings
   const filteredSightings = sightings
