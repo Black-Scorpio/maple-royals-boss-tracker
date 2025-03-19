@@ -41,7 +41,23 @@ function App() {
 
   const currentUnspawnedChannels =
     selectedMonster && selectedMap
-      ? unspawnedChannels[`${selectedMonster.name}-${selectedMap}`] || []
+      ? (
+          unspawnedChannels[`${selectedMonster.name}-${selectedMap}`] || []
+        ).filter((channel) => {
+          const sighting = sightings.find(
+            (s) =>
+              s.monsterId === selectedMonster.id &&
+              s.map === selectedMap &&
+              s.channel === channel
+          );
+
+          if (!sighting) return true; // If no sighting data, assume it's unspawned
+
+          const now = new Date();
+          const earliest = sighting.respawnRange.earliest.toDate();
+
+          return now >= earliest; // Only keep channels where the respawn window has started
+        })
       : [];
 
   return (
