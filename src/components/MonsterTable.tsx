@@ -36,11 +36,10 @@ export const MonsterTable = ({
 
   // Helper function to determine respawn status and color
   const getRespawnStatusAndColor = (sighting: Sighting) => {
-    const now = currentTime; // Use the currentTime state
+    const now = currentTime;
     const earliest = sighting.respawnRange.earliest.toDate();
     const latest = sighting.respawnRange.latest.toDate();
 
-    // Calculate the halfway point between earliest and latest
     const halfwayPoint = new Date(
       earliest.getTime() + (latest.getTime() - earliest.getTime()) / 2
     );
@@ -49,32 +48,52 @@ export const MonsterTable = ({
       (earliest.getTime() - now.getTime()) / 60000
     );
 
+    // Function to format time dynamically
+    const formatTimeRemaining = (minutes: number) => {
+      if (minutes >= 1440) {
+        // More than a day
+        const days = Math.floor(minutes / 1440);
+        const hours = Math.floor((minutes % 1440) / 60);
+        return `${days}d ${hours}h`;
+      } else if (minutes >= 60) {
+        // More than an hour
+        const hours = Math.floor(minutes / 60);
+        const mins = minutes % 60;
+        return `${hours}h ${mins}m`;
+      } else {
+        // Less than an hour
+        return `${minutes}m`;
+      }
+    };
+
     if (minutesUntilEarliest > 30) {
       return {
-        status: `Respawns in ~${minutesUntilEarliest} minutes (${formatTime(
-          earliest
-        )})`,
-        color: "#ffebee", // Far from respawning (Red)
+        status: `Respawns in ~${formatTimeRemaining(
+          minutesUntilEarliest
+        )} (${formatTime(earliest)})`,
+        color: "#ffebee",
       };
     } else if (minutesUntilEarliest > 0) {
       return {
-        status: `Respawning soon! (~${minutesUntilEarliest} minutes)`,
-        color: "#fff9c4", // Close to respawning (Yellow)
+        status: `Respawning soon! (~${formatTimeRemaining(
+          minutesUntilEarliest
+        )})`,
+        color: "#fff9c4",
       };
     } else if (now >= earliest && now < halfwayPoint) {
       return {
         status: `Respawn any second!`,
-        color: "#e8f5e9", // Light Green (earliest to halfway)
+        color: "#e8f5e9",
       };
     } else if (now >= halfwayPoint && now < latest) {
       return {
         status: `Good chance it's spawned!`,
-        color: "#c8e6c9", // Dark Green (halfway to latest)
+        color: "#c8e6c9",
       };
     } else {
       return {
         status: "Already respawned",
-        color: "#ffebee", // Already respawned (Red)
+        color: "#ffebee",
       };
     }
   };
