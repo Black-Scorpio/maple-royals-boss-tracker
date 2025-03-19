@@ -56,50 +56,51 @@ export const updateMonster = async (
   await updateDoc(doc(db, "monsters", monsterId), newData);
 };
 
-// Check for existing sighting and update it
-export const recordSighting = async (
-  monster: Monster,
+const getExistingSighting = async (
+  monsterId: string,
   map: string,
   channel: number
 ) => {
-  const foundAt = new Date();
-  const respawnTimeMs = monster.respawnTime * 60 * 60 * 1000; // Convert hours to ms
-
-  const earliest = new Date(foundAt.getTime() + respawnTimeMs);
-  const latest = new Date(foundAt.getTime() + respawnTimeMs * 1.2);
-
-  // Check for existing sighting
   const existingSightingQuery = query(
     collection(db, "sightings"),
-    where("monsterId", "==", monster.id),
+    where("monsterId", "==", monsterId),
     where("map", "==", map),
     where("channel", "==", channel)
   );
-  const existingSightingSnapshot = await getDocs(existingSightingQuery);
 
-  if (!existingSightingSnapshot.empty) {
-    // Update existing sighting
-    const existingSighting = existingSightingSnapshot.docs[0];
-    await updateDoc(doc(db, "sightings", existingSighting.id), {
-      foundAt: Timestamp.fromDate(foundAt),
-      respawnRange: {
-        earliest: Timestamp.fromDate(earliest),
-        latest: Timestamp.fromDate(latest),
-      },
-    });
+  const snapshot = await getDocs(existingSightingQuery);
+  return snapshot.empty ? null : snapshot.docs[0]; // Return first matching document if found
+};
+
+// Check for existing sighting and update it
+export const saveSighting = async (
+  monster: Monster,
+  map: string,
+  channel: number,
+  foundAt: Date = new Date()
+) => {
+  const respawnTimeMs = monster.respawnTime * 60 * 60 * 1000; // Convert hours to ms
+  const earliest = new Date(foundAt.getTime() + respawnTimeMs * 0.8);
+  const latest = new Date(foundAt.getTime() + respawnTimeMs * 1.2);
+
+  const sightingData = {
+    monsterId: monster.id,
+    monsterName: monster.name,
+    map,
+    channel,
+    foundAt: Timestamp.fromDate(foundAt),
+    respawnRange: {
+      earliest: Timestamp.fromDate(earliest),
+      latest: Timestamp.fromDate(latest),
+    },
+  };
+
+  const existingSighting = await getExistingSighting(monster.id, map, channel);
+
+  if (existingSighting) {
+    await updateDoc(doc(db, "sightings", existingSighting.id), sightingData);
   } else {
-    // Add new sighting
-    await addDoc(collection(db, "sightings"), {
-      monsterId: monster.id,
-      monsterName: monster.name,
-      map,
-      channel,
-      foundAt: Timestamp.fromDate(foundAt),
-      respawnRange: {
-        earliest: Timestamp.fromDate(earliest),
-        latest: Timestamp.fromDate(latest),
-      },
-    });
+    await addDoc(collection(db, "sightings"), sightingData);
   }
 };
 

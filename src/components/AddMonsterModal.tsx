@@ -8,12 +8,8 @@ import {
   Stack,
 } from "@mui/material";
 import { addMonster } from "../services/firebaseService";
-
-interface AddMonsterModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onAdd: () => void; // Callback to close the modal
-}
+import { AddMonsterModalProps } from "../interfaces";
+import { toast } from "react-toastify";
 
 export const AddMonsterModal = ({
   isOpen,
@@ -27,7 +23,7 @@ export const AddMonsterModal = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !respawnTime || !maps) {
-      alert("Please fill out all fields.");
+      toast.error("Please fill out all fields.");
       return;
     }
 
@@ -37,7 +33,7 @@ export const AddMonsterModal = ({
         maps.split(",").map((map) => map.trim()),
         respawnTime
       );
-      alert("Monster added successfully!");
+      toast.success("Monster added successfully!");
       setName("");
       setRespawnTime(0);
       setMaps("");
@@ -45,6 +41,7 @@ export const AddMonsterModal = ({
       onClose(); // Close the modal
     } catch (error) {
       console.error("Error adding monster:", error);
+      toast.error("Error adding monster. Please try again.");
     }
   };
 
