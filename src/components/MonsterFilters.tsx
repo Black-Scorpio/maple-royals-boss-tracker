@@ -25,8 +25,8 @@ export const MonsterFilters = ({
   setChannelFilter,
   sightings,
 }: MonsterFiltersProps) => (
-  <Grid2>
-    <Grid2>
+  <Grid2 container spacing={2} alignItems="center" padding={2}>
+    <Grid2 sx={{ width: "30%" }}>
       <FormControl fullWidth>
         <InputLabel>Filter by Monster</InputLabel>
         <Select
@@ -43,7 +43,7 @@ export const MonsterFilters = ({
         </Select>
       </FormControl>
     </Grid2>
-    <Grid2>
+    <Grid2 sx={{ width: "30%" }}>
       <FormControl fullWidth>
         <InputLabel>Filter by Map</InputLabel>
         <Select
@@ -60,7 +60,7 @@ export const MonsterFilters = ({
         </Select>
       </FormControl>
     </Grid2>
-    <Grid2>
+    <Grid2 sx={{ width: "30%" }}>
       <FormControl fullWidth>
         <InputLabel>Filter by Channel</InputLabel>
         <Select
