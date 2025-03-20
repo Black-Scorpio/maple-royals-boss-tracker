@@ -14,14 +14,14 @@ import {
   FormControlLabel,
   Box,
 } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete"; // Import the delete icon
-import StarIcon from "@mui/icons-material/Star"; // Import the star icon for favorites
-import StarBorderIcon from "@mui/icons-material/StarBorder"; // Import the outlined star icon
+import DeleteIcon from "@mui/icons-material/Delete";
+import StarIcon from "@mui/icons-material/Star";
+import StarBorderIcon from "@mui/icons-material/StarBorder";
 
 interface MonsterSelectorProps {
   monsters: Monster[];
   onSelect: (monster: Monster | null, selectedMap: string) => void;
-  onDelete: (monsterId: string) => void; // Callback to delete a monster
+  onDelete: (monsterId: string) => void;
 }
 
 export const MonsterSelector = ({
@@ -31,16 +31,13 @@ export const MonsterSelector = ({
 }: MonsterSelectorProps) => {
   const [selectedMonster, setSelectedMonster] = useState<Monster | null>(null);
   const [selectedMap, setSelectedMap] = useState<string>("");
-  const [favorites, setFavorites] = useState<string[]>([]); // Track favorited monster IDs
-  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false); // Toggle for showing only favorites
+  const [favorites, setFavorites] = useState<string[]>([]);
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
 
-  // Toggle a monster's favorite status
   const toggleFavorite = (monsterId: string) => {
     if (favorites.includes(monsterId)) {
-      // Remove from favorites
       setFavorites(favorites.filter((id) => id !== monsterId));
     } else {
-      // Add to favorites
       setFavorites([...favorites, monsterId]);
     }
   };
@@ -49,7 +46,7 @@ export const MonsterSelector = ({
     const monster = monsters.find((m) => m.name === event.target.value);
     setSelectedMonster(monster || null);
     if (monster) {
-      setSelectedMap(monster.maps[0]); // Auto-select the first map
+      setSelectedMap(monster.maps[0]);
       onSelect(monster, monster.maps[0]);
     } else {
       setSelectedMap("");
@@ -64,24 +61,21 @@ export const MonsterSelector = ({
     }
   };
 
-  // Generate the picture path based on the monster's name
   const getPicturePath = (monsterName: string) => {
     return `/monsters/${monsterName.toLowerCase().replace(/ /g, "_")}.png`;
   };
 
-  // Handle delete monster
   const handleDeleteMonster = () => {
     if (
       selectedMonster &&
       window.confirm("Are you sure you want to delete this monster?")
     ) {
-      onDelete(selectedMonster.id); // Call the onDelete callback
-      setSelectedMonster(null); // Clear the selected monster
-      setSelectedMap(""); // Clear the selected map
+      onDelete(selectedMonster.id);
+      setSelectedMonster(null);
+      setSelectedMap("");
     }
   };
 
-  // Filter monsters based on the "Show Favorites Only" checkbox
   const filteredMonsters = showFavoritesOnly
     ? monsters.filter((monster) => favorites.includes(monster.id))
     : monsters;
@@ -92,7 +86,6 @@ export const MonsterSelector = ({
         Select Monster
       </Typography>
 
-      {/* Monster Image */}
       {selectedMonster && (
         <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
           <img
@@ -103,11 +96,17 @@ export const MonsterSelector = ({
         </Box>
       )}
 
-      {/* Monster Selection, Show Favorites, and Map Dropdowns */}
-      <Grid2 container spacing={2} alignItems="center">
+      <Grid2
+        container
+        spacing={2}
+        alignItems="center"
+        sx={{ display: "flex", justifyContent: "center", mb: 2 }}
+      >
         {/* Monster Selection Dropdown */}
         <Grid2>
-          <FormControl fullWidth>
+          <FormControl fullWidth sx={{ minWidth: 200 }}>
+            {" "}
+            {/* Add minWidth here */}
             <InputLabel>Monster</InputLabel>
             <Select
               value={selectedMonster?.name || ""}
@@ -116,22 +115,22 @@ export const MonsterSelector = ({
             >
               <MenuItem value="">Select a monster</MenuItem>
               {filteredMonsters
-                .sort((a, b) => a.name.localeCompare(b.name)) // Sort monsters alphabetically by name
+                .sort((a, b) => a.name.localeCompare(b.name))
                 .map((monster) => (
                   <MenuItem key={monster.id} value={monster.name}>
                     {monster.name}
                     <IconButton
                       onClick={(e) => {
-                        e.stopPropagation(); // Prevent the dropdown from closing
+                        e.stopPropagation();
                         toggleFavorite(monster.id);
                       }}
                       size="small"
                       sx={{ ml: 1 }}
                     >
                       {favorites.includes(monster.id) ? (
-                        <StarIcon color="primary" /> // Filled star for favorited monsters
+                        <StarIcon color="primary" />
                       ) : (
-                        <StarBorderIcon color="primary" /> // Outlined star for non-favorited monsters
+                        <StarBorderIcon color="primary" />
                       )}
                     </IconButton>
                   </MenuItem>
@@ -156,13 +155,15 @@ export const MonsterSelector = ({
 
         {/* Map Dropdown */}
         <Grid2>
-          <FormControl fullWidth>
+          <FormControl fullWidth sx={{ minWidth: 200 }}>
+            {" "}
+            {/* Add minWidth here */}
             <InputLabel>Map</InputLabel>
             <Select
               value={selectedMap}
               onChange={handleMapChange}
               label="Map"
-              disabled={!selectedMonster} // Disable if no monster is selected
+              disabled={!selectedMonster}
             >
               {selectedMonster?.maps.map((map) => (
                 <MenuItem key={map} value={map}>
@@ -173,7 +174,6 @@ export const MonsterSelector = ({
           </FormControl>
         </Grid2>
         <Grid2 sx={{ display: "flex", justifyContent: "flex-end" }}>
-          {/* Delete Button */}
           <IconButton
             onClick={handleDeleteMonster}
             color="error"
@@ -184,7 +184,6 @@ export const MonsterSelector = ({
         </Grid2>
       </Grid2>
 
-      {/* Selected Monster Details */}
       {selectedMonster && (
         <Grid2 container spacing={2} sx={{ mt: 2 }}>
           <Grid2>
