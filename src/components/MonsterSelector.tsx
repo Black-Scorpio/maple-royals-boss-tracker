@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react"; // Add useEffect
 import { Monster } from "../interfaces";
 import {
   FormControl,
@@ -14,33 +14,39 @@ import {
   FormControlLabel,
   Box,
 } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
 import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
+import { useFavorites } from "../context/FavoritesContext";
 
 interface MonsterSelectorProps {
   monsters: Monster[];
   onSelect: (monster: Monster | null, selectedMap: string) => void;
-  onDelete: (monsterId: string) => void;
+  onDelete?: (monsterId: string) => void;
 }
 
 export const MonsterSelector = ({
   monsters,
   onSelect,
-  onDelete,
-}: MonsterSelectorProps) => {
+}: // onDelete,
+MonsterSelectorProps) => {
   const [selectedMonster, setSelectedMonster] = useState<Monster | null>(null);
   const [selectedMap, setSelectedMap] = useState<string>("");
-  const [favorites, setFavorites] = useState<string[]>([]);
-  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
 
-  const toggleFavorite = (monsterId: string) => {
-    if (favorites.includes(monsterId)) {
-      setFavorites(favorites.filter((id) => id !== monsterId));
-    } else {
-      setFavorites([...favorites, monsterId]);
-    }
-  };
+  // Load showFavoritesOnly from localStorage on initial render
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(() => {
+    const savedShowFavorites = localStorage.getItem("showFavoritesOnly");
+    return savedShowFavorites ? JSON.parse(savedShowFavorites) : false;
+  });
+
+  // Save showFavoritesOnly to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem(
+      "showFavoritesOnly",
+      JSON.stringify(showFavoritesOnly)
+    );
+  }, [showFavoritesOnly]);
+
+  const { toggleFavorite, isFavorite } = useFavorites();
 
   const handleMonsterChange = (event: SelectChangeEvent<string>) => {
     const monster = monsters.find((m) => m.name === event.target.value);
@@ -65,19 +71,19 @@ export const MonsterSelector = ({
     return `/monsters/${monsterName.toLowerCase().replace(/ /g, "_")}.png`;
   };
 
-  const handleDeleteMonster = () => {
-    if (
-      selectedMonster &&
-      window.confirm("Are you sure you want to delete this monster?")
-    ) {
-      onDelete(selectedMonster.id);
-      setSelectedMonster(null);
-      setSelectedMap("");
-    }
-  };
+  // const handleDeleteMonster = () => {
+  //   if (
+  //     selectedMonster &&
+  //     window.confirm("Are you sure you want to delete this monster?")
+  //   ) {
+  //     onDelete(selectedMonster.id);
+  //     setSelectedMonster(null);
+  //     setSelectedMap("");
+  //   }
+  // };
 
   const filteredMonsters = showFavoritesOnly
-    ? monsters.filter((monster) => favorites.includes(monster.id))
+    ? monsters.filter((monster) => isFavorite(monster.id))
     : monsters;
 
   return (
@@ -105,8 +111,6 @@ export const MonsterSelector = ({
         {/* Monster Selection Dropdown */}
         <Grid2>
           <FormControl fullWidth sx={{ minWidth: 200 }}>
-            {" "}
-            {/* Add minWidth here */}
             <InputLabel>Monster</InputLabel>
             <Select
               value={selectedMonster?.name || ""}
@@ -127,7 +131,7 @@ export const MonsterSelector = ({
                       size="small"
                       sx={{ ml: 1 }}
                     >
-                      {favorites.includes(monster.id) ? (
+                      {isFavorite(monster.id) ? (
                         <StarIcon color="primary" />
                       ) : (
                         <StarBorderIcon color="primary" />
@@ -156,8 +160,6 @@ export const MonsterSelector = ({
         {/* Map Dropdown */}
         <Grid2>
           <FormControl fullWidth sx={{ minWidth: 200 }}>
-            {" "}
-            {/* Add minWidth here */}
             <InputLabel>Map</InputLabel>
             <Select
               value={selectedMap}
@@ -174,13 +176,13 @@ export const MonsterSelector = ({
           </FormControl>
         </Grid2>
         <Grid2 sx={{ display: "flex", justifyContent: "flex-end" }}>
-          <IconButton
+          {/* <IconButton
             onClick={handleDeleteMonster}
             color="error"
             aria-label="delete monster"
           >
             <DeleteIcon />
-          </IconButton>
+          </IconButton> */}
         </Grid2>
       </Grid2>
 

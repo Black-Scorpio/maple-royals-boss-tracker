@@ -82,7 +82,7 @@ export const MonsterTable = ({
       };
     } else if (now >= earliest && now < halfwayPoint) {
       return {
-        status: `Respawn any second!`,
+        status: `Respawns any second!`,
         color: "#e8f5e9",
       };
     } else if (now >= halfwayPoint && now < latest) {
