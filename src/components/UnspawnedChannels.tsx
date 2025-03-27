@@ -7,7 +7,7 @@ export const UnspawnedChannels = ({
 }: UnspawnedChannelsProps) => (
   <Paper sx={{ p: 2 }}>
     <Typography variant="h6" gutterBottom>
-      Unspawned Channels
+      Untracked Channels
     </Typography>
     <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, width: "50%" }}>
       {channels.map((ch) => (

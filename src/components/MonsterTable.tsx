@@ -9,6 +9,11 @@ import {
   IconButton,
   Button,
   Box,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Sighting } from "../interfaces";
@@ -17,18 +22,20 @@ import { useEffect, useState } from "react";
 interface MonsterTableProps {
   sightings: Sighting[];
   onDelete: (sightingId: string) => void;
-  formatTime: (date: Date, timezone?: "GMT" | "ET") => string; // Updated to accept timezone
+  formatTime: (date: Date, timezone?: "GMT" | "ET") => string;
 }
 
 export const MonsterTable = ({
   sightings,
   onDelete,
-  formatTime, // Your existing formatTime function
+  formatTime,
 }: MonsterTableProps) => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [timezone, setTimezone] = useState<"GMT" | "ET">(() => {
     return localStorage.getItem("timezone") === "GMT" ? "GMT" : "ET";
   });
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [sightingToDelete, setSightingToDelete] = useState<string | null>(null);
 
   // Update currentTime every minute
   useEffect(() => {
@@ -42,6 +49,24 @@ export const MonsterTable = ({
     const newTimezone = timezone === "GMT" ? "ET" : "GMT";
     setTimezone(newTimezone);
     localStorage.setItem("timezone", newTimezone);
+  };
+
+  const handleDeleteClick = (sightingId: string) => {
+    setSightingToDelete(sightingId);
+    setOpenDeleteDialog(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (sightingToDelete) {
+      onDelete(sightingToDelete);
+    }
+    setOpenDeleteDialog(false);
+    setSightingToDelete(null);
+  };
+
+  const handleCancelDelete = () => {
+    setOpenDeleteDialog(false);
+    setSightingToDelete(null);
   };
 
   // Helper function to determine respawn status and color
@@ -105,72 +130,96 @@ export const MonsterTable = ({
   };
 
   return (
-    <TableContainer component={Paper}>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell colSpan={7}>
-              <Box display="flex" justifyContent="flex-end">
-                <Button
-                  variant="outlined"
-                  onClick={toggleTimezone}
-                  sx={{ mb: 1 }}
-                >
-                  Switch to {timezone === "GMT" ? "ET" : "GMT"} Time
-                </Button>
-              </Box>
-            </TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell>Monster</TableCell>
-            <TableCell>Map</TableCell>
-            <TableCell>Channel</TableCell>
-            <TableCell>
-              Last Found At{" "}
-              <small>({timezone === "GMT" ? "24h" : "12h"})</small>
-            </TableCell>
-            <TableCell>
-              Respawn Range{" "}
-              <small>({timezone === "GMT" ? "24h" : "12h"})</small>
-            </TableCell>
-            <TableCell>Respawn Status</TableCell>
-            <TableCell>Actions</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {sightings.map((sighting) => {
-            const { status, color } = getRespawnStatusAndColor(sighting);
-            return (
-              <TableRow key={sighting.id} sx={{ backgroundColor: color }}>
-                <TableCell>{sighting.monsterName}</TableCell>
-                <TableCell>{sighting.map}</TableCell>
-                <TableCell>{sighting.channel}</TableCell>
-                <TableCell>
-                  {formatTime(sighting.foundAt.toDate(), timezone)}
-                </TableCell>
-                <TableCell>
-                  {`${formatTime(
-                    sighting.respawnRange.earliest.toDate(),
-                    timezone
-                  )} - ${formatTime(
-                    sighting.respawnRange.latest.toDate(),
-                    timezone
-                  )}`}
-                </TableCell>
-                <TableCell>{status}</TableCell>
-                <TableCell>
-                  <IconButton
-                    onClick={() => onDelete(sighting.id)}
-                    color="error"
+    <>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell colSpan={7}>
+                <Box display="flex" justifyContent="flex-end">
+                  <Button
+                    variant="outlined"
+                    onClick={toggleTimezone}
+                    sx={{ mb: 1 }}
                   >
-                    <DeleteIcon />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
-    </TableContainer>
+                    Switch to {timezone === "GMT" ? "ET" : "GMT"} Time
+                  </Button>
+                </Box>
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>Monster</TableCell>
+              <TableCell>Map</TableCell>
+              <TableCell>Channel</TableCell>
+              <TableCell>
+                Last Found At{" "}
+                <small>({timezone === "GMT" ? "24h" : "12h"})</small>
+              </TableCell>
+              <TableCell>
+                Respawn Range{" "}
+                <small>({timezone === "GMT" ? "24h" : "12h"})</small>
+              </TableCell>
+              <TableCell>Respawn Status</TableCell>
+              <TableCell>Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {sightings.map((sighting) => {
+              const { status, color } = getRespawnStatusAndColor(sighting);
+              return (
+                <TableRow key={sighting.id} sx={{ backgroundColor: color }}>
+                  <TableCell>{sighting.monsterName}</TableCell>
+                  <TableCell>{sighting.map}</TableCell>
+                  <TableCell>{sighting.channel}</TableCell>
+                  <TableCell>
+                    {formatTime(sighting.foundAt.toDate(), timezone)}
+                  </TableCell>
+                  <TableCell>
+                    {`${formatTime(
+                      sighting.respawnRange.earliest.toDate(),
+                      timezone
+                    )} - ${formatTime(
+                      sighting.respawnRange.latest.toDate(),
+                      timezone
+                    )}`}
+                  </TableCell>
+                  <TableCell>{status}</TableCell>
+                  <TableCell>
+                    <IconButton
+                      onClick={() => handleDeleteClick(sighting.id)}
+                      color="error"
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={openDeleteDialog}
+        onClose={handleCancelDelete}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">{"Delete Sighting?"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure you want to delete this sighting? This action cannot be
+            undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelDelete}>Cancel</Button>
+          <Button onClick={handleConfirmDelete} color="error" autoFocus>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 };
