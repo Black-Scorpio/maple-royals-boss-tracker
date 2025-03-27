@@ -7,32 +7,42 @@ import {
   TableRow,
   Paper,
   IconButton,
+  Button,
+  Box,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Sighting } from "../interfaces";
-import { useEffect, useState } from "react"; // Import useEffect and useState
+import { useEffect, useState } from "react";
 
 interface MonsterTableProps {
   sightings: Sighting[];
   onDelete: (sightingId: string) => void;
-  formatTime: (date: Date) => string;
+  formatTime: (date: Date, timezone?: "GMT" | "ET") => string; // Updated to accept timezone
 }
 
 export const MonsterTable = ({
   sightings,
   onDelete,
-  formatTime,
+  formatTime, // Your existing formatTime function
 }: MonsterTableProps) => {
-  const [currentTime, setCurrentTime] = useState(new Date()); // State to track current time
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [timezone, setTimezone] = useState<"GMT" | "ET">(() => {
+    return localStorage.getItem("timezone") === "GMT" ? "GMT" : "ET";
+  });
 
   // Update currentTime every minute
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentTime(new Date()); // Update currentTime every 60 seconds
-    }, 60000); // 60,000 milliseconds = 1 minute
-
-    return () => clearInterval(interval); // Cleanup interval on unmount
+      setCurrentTime(new Date());
+    }, 60000);
+    return () => clearInterval(interval);
   }, []);
+
+  const toggleTimezone = () => {
+    const newTimezone = timezone === "GMT" ? "ET" : "GMT";
+    setTimezone(newTimezone);
+    localStorage.setItem("timezone", newTimezone);
+  };
 
   // Helper function to determine respawn status and color
   const getRespawnStatusAndColor = (sighting: Sighting) => {
@@ -48,20 +58,16 @@ export const MonsterTable = ({
       (earliest.getTime() - now.getTime()) / 60000
     );
 
-    // Function to format time dynamically
     const formatTimeRemaining = (minutes: number) => {
       if (minutes >= 1440) {
-        // More than a day
         const days = Math.floor(minutes / 1440);
         const hours = Math.floor((minutes % 1440) / 60);
         return `${days}d ${hours}h`;
       } else if (minutes >= 60) {
-        // More than an hour
         const hours = Math.floor(minutes / 60);
         const mins = minutes % 60;
         return `${hours}h ${mins}m`;
       } else {
-        // Less than an hour
         return `${minutes}m`;
       }
     };
@@ -70,7 +76,7 @@ export const MonsterTable = ({
       return {
         status: `Respawns in ~${formatTimeRemaining(
           minutesUntilEarliest
-        )} (${formatTime(earliest)})`,
+        )} (${formatTime(earliest, timezone)})`,
         color: "#ffebee",
       };
     } else if (minutesUntilEarliest >= 0) {
@@ -103,11 +109,30 @@ export const MonsterTable = ({
       <Table>
         <TableHead>
           <TableRow>
+            <TableCell colSpan={7}>
+              <Box display="flex" justifyContent="flex-end">
+                <Button
+                  variant="outlined"
+                  onClick={toggleTimezone}
+                  sx={{ mb: 1 }}
+                >
+                  Switch to {timezone === "GMT" ? "ET" : "GMT"} Time
+                </Button>
+              </Box>
+            </TableCell>
+          </TableRow>
+          <TableRow>
             <TableCell>Monster</TableCell>
             <TableCell>Map</TableCell>
             <TableCell>Channel</TableCell>
-            <TableCell>Last Found At</TableCell>
-            <TableCell>Respawn Time Range</TableCell>
+            <TableCell>
+              Last Found At{" "}
+              <small>({timezone === "GMT" ? "24h" : "12h"})</small>
+            </TableCell>
+            <TableCell>
+              Respawn Range{" "}
+              <small>({timezone === "GMT" ? "24h" : "12h"})</small>
+            </TableCell>
             <TableCell>Respawn Status</TableCell>
             <TableCell>Actions</TableCell>
           </TableRow>
@@ -120,11 +145,17 @@ export const MonsterTable = ({
                 <TableCell>{sighting.monsterName}</TableCell>
                 <TableCell>{sighting.map}</TableCell>
                 <TableCell>{sighting.channel}</TableCell>
-                <TableCell>{formatTime(sighting.foundAt.toDate())}</TableCell>
+                <TableCell>
+                  {formatTime(sighting.foundAt.toDate(), timezone)}
+                </TableCell>
                 <TableCell>
                   {`${formatTime(
-                    sighting.respawnRange.earliest.toDate()
-                  )} - ${formatTime(sighting.respawnRange.latest.toDate())}`}
+                    sighting.respawnRange.earliest.toDate(),
+                    timezone
+                  )} - ${formatTime(
+                    sighting.respawnRange.latest.toDate(),
+                    timezone
+                  )}`}
                 </TableCell>
                 <TableCell>{status}</TableCell>
                 <TableCell>
