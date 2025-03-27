@@ -22,9 +22,8 @@ export const About = ({ onClose }: AboutProps) => {
 
       <Typography variant="body1" paragraph>
         Welcome to the Monster Tracker App! This app helps you track monster
-        spawns and predict their respawn times in both{" "}
-        <strong>Eastern Time (ET)</strong> and <strong>GMT (Game Time)</strong>.
-        Below is a guide on how to use the app effectively.
+        spawns and predict their respawn times. Below is a guide on how to use
+        the app effectively.
       </Typography>
 
       <Divider sx={{ my: 2 }} />
@@ -36,21 +35,7 @@ export const About = ({ onClose }: AboutProps) => {
       <List>
         <ListItem>
           <ListItemText
-            primary="1. Timezone Support"
-            secondary={
-              <>
-                The app supports both <strong>Eastern Time (ET)</strong> for
-                your local time and <strong>GMT</strong> (24-hour format) which
-                matches the game's timezone. Use the toggle button in the
-                monster table to switch between timezones. GMT times will
-                display in 24-hour format while ET uses 12-hour AM/PM format.
-              </>
-            }
-          />
-        </ListItem>
-        <ListItem>
-          <ListItemText
-            primary="2. Marking a Monster as Found"
+            primary="1. Marking a Monster as Found"
             secondary={
               <>
                 After you've killed the monster, hit the{" "}
@@ -63,7 +48,7 @@ export const About = ({ onClose }: AboutProps) => {
         </ListItem>
         <ListItem>
           <ListItemText
-            primary="3. Favoriting Monsters"
+            primary="2. Favoriting Monsters"
             secondary={
               <>
                 You can favorite monsters by clicking the star icon next to
@@ -77,13 +62,56 @@ export const About = ({ onClose }: AboutProps) => {
         </ListItem>
         <ListItem>
           <ListItemText
-            primary="4. Adding a Sighting"
+            primary="3. Adding a Sighting"
             secondary={
               <>
                 If you want to predict a monster spawn or believe it was killed
                 at a certain time, use the <strong>"Add Sighting"</strong>{" "}
                 button to add the monster to the sighting table. This will help
                 you track when the monster might respawn.
+              </>
+            }
+          />
+        </ListItem>
+        <ListItem>
+          <ListItemText
+            primary="4. Filtering Monster Sightings"
+            secondary={
+              <>
+                You can filter the Monster Sightings Table by selecting
+                specific:
+                <ul
+                  style={{
+                    marginTop: "4px",
+                    marginBottom: "4px",
+                    paddingLeft: "20px",
+                  }}
+                >
+                  <li>
+                    <strong>Monsters</strong> from the dropdown
+                  </li>
+                  <li>
+                    <strong>Maps</strong> where they spawn
+                  </li>
+                  <li>
+                    <strong>Channels</strong> where they were last seen
+                  </li>
+                </ul>
+                This helps you focus on specific monsters or hunting areas.
+              </>
+            }
+          />
+        </ListItem>
+        <ListItem>
+          <ListItemText
+            primary="5. Timezone Support"
+            secondary={
+              <>
+                The app supports both <strong>Eastern Time (ET)</strong> for
+                your local time and <strong>GMT</strong> (24-hour format) which
+                matches the game's timezone. Use the toggle button in the
+                monster table to switch between timezones. GMT times will
+                display in 24-hour format while ET uses 12-hour AM/PM format.
               </>
             }
           />
