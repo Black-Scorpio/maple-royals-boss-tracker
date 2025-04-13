@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Modal,
   Box,
@@ -33,11 +33,21 @@ export const AddSightingModal = ({
   const [channel, setChannel] = useState<number>(1);
   const [foundAt, setFoundAt] = useState<string>("");
 
+  // Set default date when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      const now = new Date();
+      // Format as YYYY-MM-DDTHH:MM (datetime-local format)
+      const formattedDate = now.toISOString().slice(0, 16);
+      setFoundAt(formattedDate);
+    }
+  }, [isOpen]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!selectedMonster || !selectedMap || !foundAt) {
-      toast.error("Please fill out all fields."); // Show error toast
+      toast.error("Please fill out all fields.");
       return;
     }
 
@@ -51,11 +61,11 @@ export const AddSightingModal = ({
       toast.success(
         `Sighting added successfully! ${selectedMonster.name} in Channel ${channel}`
       );
-      onAdd(); // Refresh the sightings list
-      onClose(); // Close the modal
+      onAdd();
+      onClose();
     } catch (error) {
       console.error("Error adding sighting:", error);
-      toast.error("Error adding sighting. Please try again."); // Show error toast
+      toast.error("Error adding sighting. Please try again.");
     }
   };
 
@@ -145,19 +155,30 @@ export const AddSightingModal = ({
               </Select>
             </FormControl>
 
-            {/* Found At Time */}
+            {/* Found At Time - Simplified */}
             <TextField
               label="Found At"
               type="datetime-local"
               value={foundAt}
               onChange={(e) => setFoundAt(e.target.value)}
-              InputLabelProps={{ shrink: true }}
+              InputLabelProps={{
+                shrink: true,
+              }}
+              inputProps={{
+                max: new Date().toISOString().slice(0, 16), // Prevent future dates
+              }}
+              fullWidth
               required
             />
 
             {/* Buttons */}
             <Stack direction="row" spacing={2}>
-              <Button type="submit" variant="contained" color="primary">
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                fullWidth
+              >
                 Add Sighting
               </Button>
               <Button
@@ -165,6 +186,7 @@ export const AddSightingModal = ({
                 variant="outlined"
                 color="secondary"
                 onClick={onClose}
+                fullWidth
               >
                 Cancel
               </Button>
